@@ -5,7 +5,7 @@
 #' @param token Character string with the Scopus query
 #'
 #' @examples
-#' connection(token = yourToken)
+#' Connector(token = yourToken)
 #'
 #' @import tidyverse
 #' @import httr
@@ -14,12 +14,17 @@
 #' @export
 #' 
 
-Connector <- R6Class(token = Sys.getenv("DATAMESH_TOKEN"), 
-                      service = 'https://datamesh.oceanum.io', 
-                      verify = TRUE) {
-  
-  
-  
-}
+Connector <- R6Class("Connector",
+                    public = list(
+                      initialize = function(token = Sys.getenv("DATAMESH_TOKEN"), 
+                                            service = 'https://datamesh.oceanum.io',
+                                            verify = TRUE)){
+                      private$
+                    }
+                    ), 
+                    private = list(
+                    #token = Sys.getenv("DATAMESH_TOKEN"),
+                    #service = 'https://datamesh.oceanum.io',
+                    #verify = TRUE) )
 
 
