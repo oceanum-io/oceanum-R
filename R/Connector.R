@@ -5,11 +5,11 @@
 #' @param token Character string with the Scopus query
 #'
 #' @examples
-#' Connector(token = yourToken)
+#' Connector$new(token = yourToken)
 #' 
 #' @import R6
 #' @import tidyverse
-#' @import httr
+#' @import httr2
 #' @import rjson
 #'
 #' @export
@@ -126,39 +126,39 @@ Connector <- R6::R6Class(
         }
       }
       
-      req <- request(
+      req <- httr2::request(
         paste0(private$proto, "://", private$host, "/datasource/")
       ) |>
-        req_headers(!!!private$auth_headers) |>
-        req_url_query(!!!query) |>
-        req_method("GET")
+        httr2::req_headers(!!!private$auth_headers) |>
+        httr2::req_url_query(!!!query) |>
+        httr2::req_method("GET")
       
-      resp <- req_perform(req)
+      resp <- httr2::req_perform(req)
       
-      if (resp_status(resp) != 200) {
+      if (httr2::resp_status(resp) != 200) {
         stop("Failed to retrieve catalog")
       }
       
-      content <- resp_body_json(resp, simplifyVector = TRUE)
-      
-      Catalog$new(content, self)
+      content <- httr2::resp_body_json(resp, simplifyVector = TRUE)
+      return(content)
+      #return(Catalog$new(content, self))
     },
     
     # -------- datasource metadata --------
     get_datasource = function(datasource_id) {
-      req <- request(
+      req <- httr2::request(
         paste0(private$proto, "://", private$host, "/datasource/", datasource_id)
       ) |>
-        req_headers(!!!private$auth_headers)
+        httr2::req_headers(!!!private$auth_headers)
       
-      resp <- req_perform(req)
+      resp <- httr2::req_perform(req)
       
-      status <- resp_status(resp)
+      status <- httr2::resp_status(resp)
       if (status == 404) stop("Datasource not found")
       if (status == 401) stop("Unauthorized")
       if (status != 200) stop("Request failed")
       
-      data <- resp_body_json(resp, simplifyVector = TRUE)
+      data <- httr2::resp_body_json(resp, simplifyVector = TRUE)
       
       props <- data$properties
       props$id   <- datasource_id
