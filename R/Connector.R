@@ -185,21 +185,21 @@ Connector <- R6::R6Class(
         warning("Row limit exceeded")
       }
       
-      req <- request(
+      req <- httr2::request(
         paste0(private$gateway, "/data/", datasource_id)
       ) |>
-        req_headers(
+        httr2::req_headers(
           !!!private$auth_headers,
           Accept = "application/json"
         )
       
-      resp <- req_perform(req)
+      resp <- httr2::req_perform(req)
       
-      if (resp_status(resp) != 200) {
+      if (httr2::resp_status(resp) != 200) {
         stop("Failed to load datasource")
       }
       
-      resp_body_json(resp, simplifyVector = TRUE)
+      httr2::resp_body_json(resp, simplifyVector = TRUE)
     },
     
     # -------- query --------
@@ -219,17 +219,17 @@ Connector <- R6::R6Class(
       if (stage$dlen > row_limit)
         warning("Row limit exceeded")
       
-      req <- request(paste0(private$service, "/oceanql/")) |>
-        req_headers(
+      req <- httr2::request(paste0(private$service, "/oceanql/")) |>
+        httr2::req_headers(
           !!!private$user$add_header(private$auth_headers),
           "Content-Type" = "application/json",
           Accept = "application/json"
         ) |>
-        req_body_json(query_input)
+        httr2::req_body_json(query_input)
       
-      resp <- req_perform(req)
+      resp <- httr2::req_perform(req)
       
-      resp_body_json(resp, simplifyVector = TRUE)
+      httr2::resp_body_json(resp, simplifyVector = TRUE)
     }
   )
 )
