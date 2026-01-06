@@ -39,6 +39,7 @@ Catalog <- R6::R6Class(
           } else {
             name = self$ids[i]
           }
+          # Format catalog information so its understandable
           cat(
             format(name), " ",
             "[",format(self$ids[i]), "]", "\n",

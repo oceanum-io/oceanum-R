@@ -140,8 +140,7 @@ Connector <- R6::R6Class(
       }
       
       content <- httr2::resp_body_json(resp, simplifyVector = TRUE)
-      return(content)
-      #return(Catalog$new(content, self))
+      return(Catalog$new(content, self))
     },
     
     # -------- datasource metadata --------

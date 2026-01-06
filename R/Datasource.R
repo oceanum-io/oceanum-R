@@ -15,5 +15,5 @@
 #' @export
 
 Datasource <- R6::R6Class(
-  
+  "Datasource",
 )
