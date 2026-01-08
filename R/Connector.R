@@ -208,7 +208,7 @@ Connector <- R6::R6Class(
     row_limit = 2e6
     ) {
 
-      #stage <- private$(query_input)
+      stage <-
 
       if (is.null(stage)) stop("No data returned")
 
@@ -229,7 +229,25 @@ Connector <- R6::R6Class(
       resp <- httr2::req_perform(req)
 
       httr2::resp_body_json(resp, simplifyVector = TRUE)
+    },
+
+    # -------- staging --------
+    stage_results = function(connector, query_input){
+      req <- httr2::request(paste0(private$service, "/oceanql/stage/")) |>
+        httr2::req_headers(
+          !!!private$auth_headers,
+          "Content-Type" = "application/json",
+          Accept = "application/json"
+        ) |>
+        httr2::req_body_json(query_input)
+      resp <- httr2::req_perform(req)
+      if (httr2::resp_status(resp) != 200) {
+        stop("")
+      }
+      httr2::resp_body_json(resp, simplifyVector = TRUE)
+      return(Stage$new(httr2::resp_body_json(resp, simplifyVector = TRUE)))
     }
+
   )
 )
 

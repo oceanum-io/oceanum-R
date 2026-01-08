@@ -129,6 +129,17 @@ Datasource <- R6::R6Class(
           if("schema" %in% prop_names){
             self$variables = props$schema$data_vars
           }
+        },
+
+        print = function() {
+          cat(
+            "Datasource:", self$name, " [", self$id, "]", "\n",
+            "Extent:", self$bounds, "\n",
+            "Timerange:", self$tstart, "to", self$tend, "\n",
+            "Attributes:", length(self$attributes), "\n",
+            "Variables:", length(self$variables)
+          )
+
         }
   )
 )
