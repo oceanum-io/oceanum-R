@@ -25,7 +25,23 @@ Connector <- R6::R6Class(
     verify = TRUE,
     proto = NULL,
     host = NULL,
-    user = NULL
+    user = NULL,
+    # -------- staging --------
+    stage_results = function(connector, query_input){
+      req <- httr2::request(paste0(private$service, "/oceanql/stage/")) |>
+        httr2::req_headers(
+          !!!private$auth_headers,
+          "Content-Type" = "application/json",
+          Accept = "application/json"
+        ) |>
+        httr2::req_body_json(query_input)
+      resp <- httr2::req_perform(req)
+      if (httr2::resp_status(resp) != 200) {
+        return(NULL)
+      }
+      httr2::resp_body_json(resp, simplifyVector = TRUE)
+      return(Stage$new(httr2::resp_body_json(resp, simplifyVector = TRUE)))
+    }
   ),
 
   public = list(
@@ -174,7 +190,7 @@ Connector <- R6::R6Class(
     row_limit  = 2e6
     ) {
 
-      #stage <- private$(list(datasource = datasource_id))
+      stage <- private$stage_results$new(list(datasource = datasource_id))
 
       if (stage$size > size_limit) {
         stop("Datasource too large for memory")
@@ -208,7 +224,7 @@ Connector <- R6::R6Class(
     row_limit = 2e6
     ) {
 
-      stage <-
+      stage <- private$stage_results(self, query_input)
 
       if (is.null(stage)) stop("No data returned")
 
@@ -220,34 +236,16 @@ Connector <- R6::R6Class(
 
       req <- httr2::request(paste0(private$service, "/oceanql/")) |>
         httr2::req_headers(
-          !!!private$user$add_header(private$auth_headers),
-          "Content-Type" = "application/json",
-          Accept = "application/json"
-        ) |>
-        httr2::req_body_json(query_input)
-
-      resp <- httr2::req_perform(req)
-
-      httr2::resp_body_json(resp, simplifyVector = TRUE)
-    },
-
-    # -------- staging --------
-    stage_results = function(connector, query_input){
-      req <- httr2::request(paste0(private$service, "/oceanql/stage/")) |>
-        httr2::req_headers(
           !!!private$auth_headers,
           "Content-Type" = "application/json",
           Accept = "application/json"
         ) |>
         httr2::req_body_json(query_input)
-      resp <- httr2::req_perform(req)
-      if (httr2::resp_status(resp) != 200) {
-        stop("")
-      }
-      httr2::resp_body_json(resp, simplifyVector = TRUE)
-      return(Stage$new(httr2::resp_body_json(resp, simplifyVector = TRUE)))
-    }
 
+      resp <- httr2::req_perform(req)
+
+      httr2::resp_body_json(resp, simplifyVector = TRUE)
+    }
   )
 )
 
