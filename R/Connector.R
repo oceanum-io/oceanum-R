@@ -180,7 +180,7 @@ Connector <- R6::R6Class(
       props$geom <- data$geometry
       props$bbox <- data$bbox
 
-      Datasource$new(props)
+      Datasource$new(props,self)
     },
 
     # -------- load datasource --------

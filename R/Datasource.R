@@ -42,7 +42,8 @@ Datasource <- R6::R6Class(
         bounds= NULL,
         geometry= NULL,
         variables= NULL,
-        initialize = function(props){
+        connector = NULL,
+        initialize = function(props, connector){
           prop_names = names(props)
           if("coordinates" %in% prop_names){
             self$coordinates = props$coordinates
@@ -129,6 +130,10 @@ Datasource <- R6::R6Class(
           if("schema" %in% prop_names){
             self$variables = props$schema$data_vars
           }
+          self$connector = connector
+        },
+        query = function(query_input){
+          self$connector$query(query_input)
         },
 
         print = function() {
@@ -139,7 +144,7 @@ Datasource <- R6::R6Class(
             "Attributes:", length(self$attributes), "\n",
             "Variables:", length(self$variables)
           )
-
+          invisible(self)
         }
   )
 )
