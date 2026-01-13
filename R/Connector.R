@@ -117,10 +117,10 @@ Connector <- R6::R6Class(
 
     # -------- catalog --------
     get_catalog = function(
-    search     = "",
-    timefilter = NULL,
-    geofilter  = NULL,
-    limit      = NA_integer_
+      search     = "",
+      timefilter = NULL,
+      geofilter  = NULL,
+      limit      = NA_integer_
     ) {
 
       query <- list()
@@ -185,9 +185,9 @@ Connector <- R6::R6Class(
 
     # -------- load datasource --------
     load_datasource = function(
-    datasource_id,
-    size_limit = 1e9,
-    row_limit  = 2e6
+      datasource_id,
+      size_limit = 1e9,
+      row_limit  = 2e6
     ) {
 
       stage <- private$stage_results$new(list(datasource = datasource_id))
@@ -219,10 +219,14 @@ Connector <- R6::R6Class(
 
     # -------- query --------
     query = function(
-    query_input,
-    query_size_limit = 1e9,
-    row_limit = 2e6
+      query_input,
+      query_size_limit = 1e9,
+      row_limit = 2e6
     ) {
+
+      if(is.list(query_input)){
+        query_input <- Query$new(list_input = query_input)
+      }
 
       stage <- private$stage_results(self, query_input)
 

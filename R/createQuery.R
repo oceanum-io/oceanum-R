@@ -117,23 +117,23 @@ createQuery <- function(theDatasource = NULL,
     result <- rawToChar(result$content) %>%
               fromJSON()
 
-    data <- lapply(result$data_vars, function(x) x$data) %>%
-             bind_rows()
+    #data <- lapply(result$data_vars, function(x) x$data) #%>%
+             #bind_rows()
 
     if(!rlang::is_empty(result$coords$index$attrs)){
 
       coords <- lapply(result$coords$index$attrs, function(x) x$data) %>%
                 bind_rows()
 
-      if(nrows(data) == nrows(coords)){
+      #if(nrows(data) == nrows(coords)){
 
-      data <- bind_cols(data, coords)
+      #data <- bind_cols(data, coords)
 
-      }
+      #}
 
     }
 
 
-    return(data)
+    return(result)
 
 }
