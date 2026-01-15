@@ -228,7 +228,7 @@ Connector <- R6::R6Class(
         query_input <- Query$new(list_input = query_input)
       }
 
-      stage <- private$stage_results(self, query_input)
+      stage <- private$stage_results(self, query_input$to_list())
 
       if (is.null(stage)) stop("No data returned")
 
@@ -244,7 +244,7 @@ Connector <- R6::R6Class(
           "Content-Type" = "application/json",
           Accept = "application/json"
         ) |>
-        httr2::req_body_json(query_input)
+        httr2::req_body_json(query_input$to_list())
 
       resp <- httr2::req_perform(req)
 
