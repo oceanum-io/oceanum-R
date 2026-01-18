@@ -16,7 +16,6 @@
 
 Query <- R6::R6Class(
   "Query",
-  private = list(),
   public = list(
     datasource = list(
       title = "The id of the datasource",
@@ -142,6 +141,7 @@ Query <- R6::R6Class(
                          '"aggregate":', aggregate, "}")
         if(!is.null(datasource)){
           self$json$datasource = datasource
+          self$datasource = datasource
         }
         if(!is.null(parameters)){
           self$json$parameters = parameters
@@ -176,6 +176,5 @@ Query <- R6::R6Class(
     to_list = function(){
       return(self$json)
     }
-
   )
 )
