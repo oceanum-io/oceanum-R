@@ -1,0 +1,69 @@
+---
+title: "datamesh_example_1"
+author: "Victor"
+date: "2026-01-22"
+output: html_document
+---
+
+## Import Relevant Libraries
+
+```{r}
+library(devtools)
+library(tidyverse)
+```
+
+## load Datamesh
+
+```{r}
+devtools::load_all()
+```
+## Connect to Datamesh API
+By default Connector will grab the system variable DATAMESH_TOKEN however a datamesh token can also be passed in.
+
+```{r}
+token <- Sys.getenv("DATAMESH_TOKEN")
+conn <- Connector$new(token = token)
+```
+
+## Browse catalog
+There are a lot of datasources in the "oceanum" catalog so we can limit the amount found using the limit.
+```{r}
+catalog <- conn$get_catalog(search = "oceanum", limit = 15)
+catalog
+```
+
+## Getting metadata about datasource
+Once we've found a datasource we can pull more information about the datasource using get_datasource.
+
+```{r}
+datasource <- conn$get_datasource("oceanum-sea-level-rise")
+datasource
+
+```
+
+## Query datasource to load it into work environment.
+
+```{r}
+query <- Query$new(datasource = "oceanum-sea-level-rise")
+data <- conn$query(query_input = query)
+```
+
+## Clean data 
+Once the data is loaded in, the formatting needs to be cleaned so that the data is tidy.
+```{r}
+clean_data <- tibble(days = as.Date(data$data_vars$Day$data), 
+               average = data$data_vars$sea_level_rise_average$data)
+```
+
+## Plot data
+R has inbuilt plotting function however personally I prefer GGplot2 for aesthetics and customisation. 
+```{r}
+clean_data |> ggplot(aes(x = days, y = average)) + 
+  geom_point() + 
+  theme_gray() + 
+  labs(title = "Oceanum Sea Level Rise Example",
+       y = "Average sea level rise",
+       x = "Year")
+```
+
+
