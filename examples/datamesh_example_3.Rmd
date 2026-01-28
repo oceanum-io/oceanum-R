@@ -1,0 +1,83 @@
+---
+title: "datamesh_example_3"
+author: "Victor"
+date: "2026-01-27"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Import libraries
+
+```{r}
+library(devtools)
+library(tidyverse)
+```
+
+## Load in Datamesh
+
+```{r}
+devtools::load_all()
+```
+
+## Connect to Datamesh API
+Please keep your Datamesh token hidden.
+```{r}
+token = Sys.getenv("DATAMESH_TOKEN")
+conn <- Connector$new()
+```
+
+## Browse catalog
+
+```{r}
+catalog <- conn$get_catalog("Whanganui")
+catalog
+```
+## Get details about datasource
+
+```{r}
+datasource = conn$get_datasource("flowrateconz_whanganui_river")
+datasource
+```
+## Query data
+This is an example of what happens when we timefilter outside the applicable time range, the filter will return NA on requested times with no data.
+```{r}
+query_input = Query$new(datasource = "flowrateconz_whanganui_river",
+                  timefilter = list(times = c("2024-01-1", "2025-01-1")))
+data = conn$query(query_input)
+              
+```
+
+## Format the data
+The time format is returned as a string which we need to convert into a plot-able time format.
+```{r}
+flow = data$data_vars$flow$data
+rain = data$data_vars$rain$data
+time = as.POSIXct(data$coords$time$data, format = "%Y-%m-%dT%H:%M:%S", tz = "UTC")
+```
+
+```{r}
+df <- tibble(time = time, flow = flow, rain = rain)
+```
+
+## Plot data
+
+```{r}
+df |> ggplot(aes(x = time, y = flow)) +
+  geom_line() + 
+  labs(x = "Time", 
+       y = bquote("Average Hourly Flow Rate (" ~ m^3/s ~ ")"),
+       title = "Whanganui River Average Hourly Flow Rate between 2024 and 2025")
+```
+
+
+```{r}
+df |> ggplot(aes(x = time, y = rain)) +
+  geom_line() + 
+  labs(x = "Time", 
+       y = bquote("Average Hourly Rain (" ~ mm ~ ")"),
+       title = "Whanganui River Average Hourly Rain between 2024 and 2025")
+```
+

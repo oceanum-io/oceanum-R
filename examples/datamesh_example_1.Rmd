@@ -5,13 +5,18 @@ date: "2026-01-22"
 output: html_document
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
 ## Import Relevant Libraries
 
 ```{r}
 library(devtools)
 library(tidyverse)
 ```
-
+ 
 ## load Datamesh
 
 ```{r}

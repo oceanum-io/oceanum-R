@@ -1,0 +1,117 @@
+---
+title: "datamesh_example_2"
+author: "Victor"
+date: "2026-01-22"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Import Relevant Libraries
+
+```{r}
+library(devtools)
+library(tidyverse)
+library(viridis)
+library(maps)
+```
+
+## load Datamesh
+
+```{r}
+devtools::load_all()
+```
+
+## Connect to Datamesh API
+By default Connector will grab the system variable DATAMESH_TOKEN however a datamesh token can also be passed in. 
+You can set your Datamesh token using: sys.setenv(DATAMESH_TOKEN = "your_token")
+```{r}
+conn = Connector$new()
+```
+
+## Browse catalog
+```{r}
+catalog = conn$get_catalog(search = "ERA5 wind", limit = 20)
+catalog
+```
+
+## Get datasource information
+```{r}
+datasource = conn$get_datasource("era5_wind10m")
+datasource
+```
+```{r}
+names(datasource$variables)
+```
+## Query the data into our work environment
+query also works for list inputs
+```{r}
+query = list(datasource = "era5_wind10m",
+             timefilter = list(times = c("2020-01-01", "2020-01-01")))
+data = conn$query(query)
+
+```
+
+## Working with the data
+Save data into dataframe for plotting
+```{r}
+u10 <- data$data_vars$u10$data
+v10 <- data$data_vars$v10$data
+
+lon <- data$coords$longitude$data
+lat <- data$coords$latitude$data
+
+
+speed <- sqrt(u10^2 + v10^2)
+speed2d <- speed[1, , ]
+
+stopifnot(
+  nrow(speed2d) == length(lat),
+  ncol(speed2d) == length(lon)
+)
+
+lon_fixed <- lon
+lon_fixed[lon_fixed > 180] <- lon_fixed[lon_fixed > 180] - 360
+
+lon_ord <- order(lon_fixed)
+lon_fixed <- lon_fixed[lon_ord]
+speed2d <- speed2d[ , lon_ord]
+
+lat_ord <- order(lat)
+lat_fixed <- lat[lat_ord]
+speed2d <- speed2d[lat_ord, ]
+
+df <- expand_grid(
+  lon = lon_fixed,
+  lat = lat_fixed
+) %>%
+  mutate(
+    speed = as.vector(speed2d)
+  )
+c(min(speed),max(speed))
+```
+
+## Visualising the data
+Let plot the wind speed using ggplot
+``` {r}
+ggplot(df, aes(lon, lat, fill = speed)) +
+  geom_raster() +
+  #borders("world", colour = "black", fill = NA) +
+  coord_fixed(expand = FALSE) +
+  scale_fill_viridis_c(
+    name = "Wind speed (m s⁻¹)",
+    limits = c(0, 25),
+    option = "turbo"
+  ) +
+  labs(
+    title = "ERA5 10 m Wind Speed",
+    x = "Longitude",
+    y = "Latitude"
+  ) +
+  theme_minimal()
+
+```
+
+
