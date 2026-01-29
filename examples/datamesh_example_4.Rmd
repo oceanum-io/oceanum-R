@@ -1,0 +1,114 @@
+---
+title: "datamesh_example_4"
+author: "Victor"
+date: "2026-01-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Import relevant libraries
+
+```{r}
+library(devtools)
+library(tidyverse)
+```
+
+## Load in Datamesh
+
+```{r}
+devtools::load_all()
+```
+
+## Connect to Datamesh API
+```{r}
+conn <- Connector$new()
+```
+
+## Browse Datamesh catalog
+
+```{r}
+catalog <- conn$get_catalog("oceanum 1km")
+catalog
+```
+
+## Get datasource variable names
+
+```{r}
+datasource <- conn$get_datasource("oceanum_wave_nz1km_nz17_era5_spec")
+print(c(datasource$tstart, datasource$end))
+names(datasource$variables)
+```
+
+## Query data into work environment
+```{r}
+query_input <- Query$new(
+  datasource = "oceanum_wave_nz1km_nz17_era5_spec",
+  variables = c("dpt", "lon", "lat","wspd")
+)
+
+data <- conn$query(query_input, row_limit = 1000000000)
+
+```
+
+## Format the data
+
+```{r}
+dpt <- data$data_vars$dpt$data
+lon <- data$coords$lon$data
+lat <- data$coords$lat$data
+time <- data$coords$time$data
+wspd <- data$data_vars$wspd$data
+
+```
+
+```{r}
+location_df <- tibble(
+  site = seq_along(lon),
+  lon  = lon,
+  lat  = lat
+)
+
+
+```
+
+## Plot data
+
+```{r}
+
+site_id <- 1  # pick any 1–45
+
+df_ts <- tibble(
+  time = as.POSIXct(time),
+  wspd = wspd[, site_id]
+)
+
+ggplot(df_ts, aes(time, wspd)) +
+  geom_line(alpha = 0.7) +
+  labs(
+    title = paste("Wind speed time series at site", site_id),
+    x = "Time",
+    y = "Wind speed (m/s)"
+  ) +
+  theme_minimal()
+
+```
+```{r}
+df_mean <- location_df |>
+  mutate(mean_wspd = colMeans(wspd, na.rm = TRUE))
+
+ggplot(df_mean, aes(lon, lat, color = mean_wspd)) +
+  geom_point(size = 3) +
+  coord_equal() +
+  scale_color_viridis_c() +
+  labs(
+    title = "Mean wind speed",
+    color = "m/s"
+  ) +
+  theme_minimal()
+
+
+```
+
