@@ -95,6 +95,8 @@ ggplot(df_ts, aes(time, wspd)) +
   theme_minimal()
 
 ```
+ 
+
 ```{r}
 df_mean <- location_df |>
   mutate(mean_wspd = colMeans(wspd, na.rm = TRUE))
